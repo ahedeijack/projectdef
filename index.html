@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitio de Prueba</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #000000;
+        }
+
+        header {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        #photoInput {
+            margin: 20px;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            width: 90%;
+            max-width: 1000%;
+            text-align: center;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+        }
+
+        #result.green {
+            background-color: #4CAF50;
+        }
+
+        #result.red {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <header>Sitio de Prueba</header>
+    <header>Email: bvzq@proton.me</header>
+
+    <main>
+        <input type="file" id="photoInput" accept="image/*" capture="environment">
+        <canvas id="qrCanvas" hidden></canvas>
+        <div id="result" hidden></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script>
+        const photoInput = document.getElementById('photoInput');
+        const qrCanvas = document.getElementById('qrCanvas');
+        const resultDiv = document.getElementById('result');
+        const qrContext = qrCanvas.getContext('2d');
+
+        photoInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+
+            img.onload = () => {
+                qrCanvas.width = img.width;
+                qrCanvas.height = img.height;
+                qrContext.drawImage(img, 0, 0, img.width, img.height);
+                const imageData = qrContext.getImageData(0, 0, img.width, img.height);
+                const code = jsQR(imageData.data, img.width, img.height);
+
+                if (code && code.data) {
+                    resultDiv.textContent = `QR encontrado: ${code.data}`;
+                    resultDiv.className = 'green';
+                } else {
+                    resultDiv.textContent = 'No se encontró ningún código QR.';
+                    resultDiv.className = 'red';
+                }
+                resultDiv.hidden = false;
+            };
+
+            img.onerror = () => {
+                alert('No se pudo cargar la imagen.');
+            };
+        });
+    </script>
+</body>
+</html>
